@@ -2293,7 +2293,8 @@ export default function CustomerAccountsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>نوع</TableHead>
-                  <TableHead>مشتری</TableHead>
+                  <TableHead>مبدا (از)</TableHead>
+                  <TableHead>مقصد (به)</TableHead>
                   <TableHead>توضیحات</TableHead>
                   <TableHead>مبلغ اعلامی کل</TableHead>
                   <TableHead>تعداد حساب</TableHead>
@@ -2310,7 +2311,7 @@ export default function CustomerAccountsPage() {
               <TableBody>
                 {transactions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center text-muted-foreground">
+                    <TableCell colSpan={14} className="text-center text-muted-foreground">
                       هیچ معامله‌ای ثبت نشده است
                     </TableCell>
                   </TableRow>
@@ -2357,9 +2358,10 @@ export default function CustomerAccountsPage() {
                           )}
                         </TableCell>
                         <TableCell className="font-medium">
-                          {transaction.type === "deposit_to_customer"
-                            ? transaction.toCustomerName
-                            : transaction.fromCustomerName}
+                          {transaction.fromCustomerName}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {transaction.toCustomerName}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">{transaction.description}</TableCell>
                         <TableCell className="font-semibold text-primary">
