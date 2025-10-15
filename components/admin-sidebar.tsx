@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Users, FileText, CreditCard, User, LogOut } from "lucide-react"
-import { logout } from "@/lib/auth"
+import { authAPI } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 
 const menuItems = [
@@ -36,13 +36,22 @@ export function AdminSidebar() {
   const router = useRouter()
   const { toast } = useToast()
 
-  const handleLogout = () => {
-    logout()
-    toast({
-      title: "خروج موفق",
-      description: "از سیستم خارج شدید",
-    })
-    router.push("/")
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout()
+      toast({
+        title: "خروج موفق",
+        description: "از سیستم خارج شدید",
+      })
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در خروج از سیستم",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

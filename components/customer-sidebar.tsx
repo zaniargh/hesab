@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { FileText, CreditCard, User, LogOut, Users } from "lucide-react"
-import { logout, getCurrentUser, getCustomerRequests } from "@/lib/auth"
+import { authAPI, requestAPI } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -42,22 +42,38 @@ export function CustomerSidebar() {
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
 
   useEffect(() => {
-    const user = getCurrentUser()
-    if (user?.type === "customer" && user.data) {
-      setCustomerName(user.data.name)
-      const requests = getCustomerRequests()
-      const pending = requests.filter((r) => r.toCustomerId === user.data!.id && r.status === "pending")
-      setPendingRequestsCount(pending.length)
+    const fetchUserData = async () => {
+      try {
+        const { user } = await authAPI.getMe()
+        if (user.type === 'customer') {
+          setCustomerName(user.name || '')
+          const { receivedRequests } = await requestAPI.getAll()
+          setPendingRequestsCount(receivedRequests.length)
+        }
+      } catch (error) {
+        // User not logged in or error
+      }
     }
+
+    fetchUserData()
   }, [pathname])
 
-  const handleLogout = () => {
-    logout()
-    toast({
-      title: "خروج موفق",
-      description: "از سیستم خارج شدید",
-    })
-    router.push("/")
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout()
+      toast({
+        title: "خروج موفق",
+        description: "از سیستم خارج شدید",
+      })
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در خروج از سیستم",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

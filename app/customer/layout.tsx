@@ -2,9 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
+import { useState } from "react"
 import { CustomerSidebar } from "@/components/customer-sidebar"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
@@ -15,15 +13,7 @@ export default function CustomerLayout({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
-
-  useEffect(() => {
-    const user = getCurrentUser()
-    if (!user || user.type !== "customer") {
-      router.push("/")
-    }
-  }, [router])
 
   return (
     <div className="flex h-screen" dir="rtl">

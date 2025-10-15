@@ -1,0 +1,136 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // هش شده با bcrypt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model Customer {
+  id                String   @id @default(uuid())
+  name              String
+  username          String   @unique
+  password          String   // هش شده با bcrypt
+  phone             String
+  address           String
+  uniqueCode        String?  @unique
+  preferredCurrency String   @default("تومان") // "ریال" یا "تومان"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // روابط
+  connectionsFrom CustomerConnection[] @relation("ConnectionFrom")
+  connectionsTo   CustomerConnection[] @relation("ConnectionTo")
+  
+  transactionsFrom CustomerTransaction[] @relation("TransactionFrom")
+  transactionsTo   CustomerTransaction[] @relation("TransactionTo")
+
+  requestsFrom CustomerRequest[] @relation("RequestFrom")
+  requestsTo   CustomerRequest[] @relation("RequestTo")
+
+  @@map("customers")
+}
+
+model CustomerConnection {
+  id                  String   @id @default(uuid())
+  ownerId             String
+  connectedCustomerId String
+  customName          String
+  createdAt           DateTime @default(now())
+
+  owner             Customer @relation("ConnectionFrom", fields: [ownerId], references: [id], onDelete: Cascade)
+  connectedCustomer Customer @relation("ConnectionTo", fields: [connectedCustomerId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, connectedCustomerId])
+  @@map("customer_connections")
+}
+
+model CustomerRequest {
+  id               String   @id @default(uuid())
+  fromCustomerId   String
+  fromCustomerName String
+  toCustomerId     String
+  toCustomerName   String
+  customName       String
+  status           String   @default("pending") // "pending" | "accepted" | "rejected"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  fromCustomer Customer @relation("RequestFrom", fields: [fromCustomerId], references: [id], onDelete: Cascade)
+  toCustomer   Customer @relation("RequestTo", fields: [toCustomerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_requests")
+}
+
+model CustomerTransaction {
+  id                   String   @id @default(uuid())
+  fromCustomerId       String
+  fromCustomerName     String
+  toCustomerId         String
+  toCustomerName       String
+  description          String
+  declaredTotalAmount  String?
+  status               String   @default("pending") // "pending" | "accepted" | "rejected"
+  type                 String   // "deposit_from_customer" | "deposit_to_customer"
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  fromCustomer Customer      @relation("TransactionFrom", fields: [fromCustomerId], references: [id], onDelete: Cascade)
+  toCustomer   Customer      @relation("TransactionTo", fields: [toCustomerId], references: [id], onDelete: Cascade)
+  accounts     BankAccount[]
+
+  @@map("customer_transactions")
+}
+
+model BankAccount {
+  id                String   @id @default(uuid())
+  transactionId     String
+  accountHolderName String
+  accountNumber     String?
+  sheba             String
+  cardNumber        String
+  bankName          String
+  declaredAmount    String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  transaction CustomerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  receipts    Receipt[]
+
+  @@map("bank_accounts")
+}
+
+model Receipt {
+  id            String   @id @default(uuid())
+  accountId     String
+  amount        String
+  trackingCode  String
+  depositId     String
+  description   String
+  depositorName String
+  receiptDate   String   // تاریخ میلادی ISO
+  submittedBy   String
+  submittedByName String
+  status        String   @default("pending") // "pending" | "approved" | "needs_follow_up"
+  approvedBy    String[] @default([])
+  submittedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  account BankAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("receipts")
+}
