@@ -1,13 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // ✅ فعال شد
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // ✅ فعال شد
   },
   images: {
     unoptimized: true,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
 }
 

@@ -459,7 +459,6 @@ export default function CustomerAccountsPage() {
     if (billionMatch) {
       const numberPart = billionMatch[0].replace(/\s*میلیارد/gi, "").trim()
       groups.billions = persianWordToNumber(numberPart)
-      console.log(`[v0] میلیارد: "${numberPart}" = ${groups.billions}`)
     }
 
     // پردازش میلیون
@@ -468,7 +467,6 @@ export default function CustomerAccountsPage() {
     if (millionMatch) {
       const numberPart = millionMatch[0].replace(/\s*میلیون/gi, "").trim()
       groups.millions = persianWordToNumber(numberPart)
-      console.log(`[v0] میلیون: "${numberPart}" = ${groups.millions}`)
     }
 
     // پردازش هزار
@@ -477,27 +475,22 @@ export default function CustomerAccountsPage() {
     if (thousandMatch) {
       const numberPart = thousandMatch[0].replace(/\s*هزار/gi, "").trim()
       groups.thousands = persianWordToNumber(numberPart)
-      console.log(`[v0] هزار: "${numberPart}" = ${groups.thousands}`)
     }
 
     // محاسبه مجموع نهایی
     const totalAmount = groups.billions * 1000000000 + groups.millions * 1000000 + groups.thousands * 1000 + groups.ones
 
-    console.log(
       `[v0] گروه‌ها: میلیارد=${groups.billions}, میلیون=${groups.millions}, هزار=${groups.thousands}, ساده=${groups.ones}`,
     )
-    console.log(`[v0] مجموع نهایی: ${totalAmount}`)
 
     return totalAmount
   }
 
   const extractReceiptInfo = (transcript: string, accountId: string) => {
     if (!transcript || transcript.trim() === "") {
-      console.log("[v0] متن خالی است، پردازش انجام نمی‌شود")
       return
     }
 
-    console.log(`[v0] متن دریافتی: ${transcript}`)
 
     let amount = ""
     let spokenCurrency = ""
@@ -596,7 +589,6 @@ export default function CustomerAccountsPage() {
       }
     }
 
-    console.log("[v0] اطلاعات استخراج شده:", {
       amount,
       trackingCode,
       depositId,
@@ -605,7 +597,6 @@ export default function CustomerAccountsPage() {
       spokenCurrency,
     })
 
-    console.log(`[v0] مقدار amount قبل از ذخیره: ${amount}`)
 
     setNewReceipts((prev) => ({
       ...prev,
@@ -620,7 +611,6 @@ export default function CustomerAccountsPage() {
     }))
 
     setTimeout(() => {
-      console.log(`[v0] مقدار amount بعد از ذخیره در state:`, newReceipts[accountId]?.amount)
     }, 100)
   }
 
@@ -639,11 +629,9 @@ export default function CustomerAccountsPage() {
         transcript += event.results[i][0].transcript
       }
 
-      console.log("[v0] متن شناسایی شده:", transcript)
       setRecognizedText((prev) => ({ ...prev, [accountId]: transcript }))
 
       if (event.results[event.results.length - 1].isFinal && !isProcessing[accountId]) {
-        console.log("[v0] پردازش نتیجه نهایی...")
         setIsProcessing((prev) => ({ ...prev, [accountId]: true }))
         extractReceiptInfo(transcript, accountId)
         setIsProcessing((prev) => ({ ...prev, [accountId]: false }))
@@ -662,12 +650,10 @@ export default function CustomerAccountsPage() {
     }
 
     recognition.onend = () => {
-      console.log("[v0] میکروفون متوقف شد")
       setIsProcessing((prev) => ({ ...prev, [accountId]: false }))
 
       // اگر کاربر هنوز میکروفون را فعال نگه داشته، دوباره راه‌اندازی کنیم
       if (isListening[accountId]) {
-        console.log("[v0] راه‌اندازی مجدد میکروفون...")
         setTimeout(() => {
           if (isListening[accountId]) {
             try {
@@ -997,8 +983,6 @@ export default function CustomerAccountsPage() {
       return
     }
 
-    console.log(`[v0] handleAddReceipt - مقدار amount قبل از ذخیره در فیش: ${receiptData.amount}`)
-    console.log(`[v0] handleAddReceipt - نوع amount: ${typeof receiptData.amount}`)
 
     const duplicateCheck = checkDuplicateReceipt(receiptData.trackingCode, receiptData.depositId)
 
@@ -1028,7 +1012,6 @@ export default function CustomerAccountsPage() {
           status: "pending", // وضعیت اولیه به عنوان در انتظار تایید
         }
 
-        console.log(`[v0] handleAddReceipt - فیش ایجاد شده:`, newReceipt)
         // فقط textbox ها را پاک کنید، نه recognizedText
 
         return {
